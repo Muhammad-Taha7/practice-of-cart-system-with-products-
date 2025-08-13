@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional E-Commerce Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- Navbar -->
+<nav class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-blue-600">ProStore</h1>
+    <button id="cart-btn" class="relative bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+      Cart
+      <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Filters -->
+<div class="max-w-7xl mx-auto px-6 py-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+  <input type="text" id="search-bar" placeholder="Search..." class="p-2 border rounded-lg w-full">
+
+  <select id="category-filter" class="p-2 border rounded-lg w-full">
+    <option value="all">All Categories</option>
+    <option value="electronics">Electronics</option>
+    <option value="clothing">Clothing</option>
+    <option value="home">Home</option>
+  </select>
+
+  <select id="sort-order" class="p-2 border rounded-lg w-full">
+    <option value="default">Sort By</option>
+    <option value="low-high">Price: Low to High</option>
+    <option value="high-low">Price: High to Low</option>
+  </select>
+
+  <div>
+    <label class="block text-sm font-medium">Max Price: <span id="price-value">100</span></label>
+    <input type="range" id="price-slider" min="0" max="100" value="100" class="w-full">
+  </div>
+</div>
+
+<!-- Products -->
+<section id="product-list" class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+
+<!-- Cart Drawer -->
+<div id="cart-drawer" class="fixed top-0 right-0 w-80 h-full bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+  <div class="p-4 border-b flex justify-between items-center">
+    <h2 class="text-xl font-bold">Your Cart</h2>
+    <button id="close-cart" class="text-gray-500 hover:text-red-500">&times;</button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+  <div class="p-4 border-t">
+    <p class="flex justify-between font-semibold">Subtotal: <span id="subtotal">$0</span></p>
+    <p class="flex justify-between">Tax (10%): <span id="tax">$0</span></p>
+    <p class="flex justify-between text-lg font-bold">Total: <span id="total">$0</span></p>
+    <button class="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">Checkout</button>
+  </div>
+</div>
+
+<script>
+const products = [
+  { name: "Smartphone", price: 50, category: "electronics", img: "https://via.placeholder.com/300x200" },
+  { name: "Laptop", price: 90, category: "electronics", img: "https://via.placeholder.com/300x200" },
+  { name: "T-Shirt", price: 20, category: "clothing", img: "https://via.placeholder.com/300x200" },
+  { name: "Jeans", price: 30, category: "clothing", img: "https://via.placeholder.com/300x200" },
+  { name: "Sofa", price: 80, category: "home", img: "https://via.placeholder.com/300x200" }
+];
+
+let cart = [];
+
+function renderProducts() {
+  const search = document.getElementById("search-bar").value.toLowerCase();
+  const category = document.getElementById("category-filter").value;
+  const sortOrder = document.getElementById("sort-order").value;
+  const maxPrice = document.getElementById("price-slider").value;
+
+  let filtered = products.filter(p =>
+    p.name.toLowerCase().includes(search) &&
+    (category === "all" || p.category === category) &&
+    p.price <= maxPrice
+  );
+
+  if (sortOrder === "low-high") filtered.sort((a, b) => a.price - b.price);
+  if (sortOrder === "high-low") filtered.sort((a, b) => b.price - a.price);
+
+  document.getElementById("product-list").innerHTML = filtered.map(p => `
+    <div class="bg-white rounded-xl shadow-lg p-4 flex flex-col">
+      <img src="${p.img}" class="rounded-lg mb-4" alt="${p.name}">
+      <h2 class="text-lg font-semibold mb-2">${p.name}</h2>
+      <p class="text-gray-600 mb-2">$${p.price}</p>
+      <button onclick="addToCart('${p.name}', ${p.price})" class="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Add to Cart</button>
+    </div>
+  `).join("");
+}
+
+function addToCart(name, price) {
+  let existing = cart.find(item => item.name === name);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ name, price, quantity: 1 });
+  }
+  updateCartUI();
+}
+
+function removeFromCart(name) {
+  cart = cart.filter(item => item.name !== name);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const cartItemsContainer = document.getElementById('cart-items');
+  const cartCount = document.getElementById('cart-count');
+  const subtotalElem = document.getElementById('subtotal');
+  const taxElem = document.getElementById('tax');
+  const totalElem = document.getElementById('total');
+
+  cartItemsContainer.innerHTML = '';
+  let subtotal = 0;
+
+  cart.forEach(item => {
+    subtotal += item.price * item.quantity;
+    cartItemsContainer.innerHTML += `
+      <div class="flex justify-between items-center border p-2 rounded-lg">
+        <div>
+          <h4 class="font-semibold">${item.name}</h4>
+          <p>$${item.price} x ${item.quantity}</p>
+        </div>
+        <button onclick="removeFromCart('${item.name}')" class="text-red-500 hover:text-red-700">&times;</button>
+      </div>
+    `;
+  });
+
+  let tax = subtotal * 0.1;
+  let total = subtotal + tax;
+
+  cartCount.textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
+  subtotalElem.textContent = `$${subtotal.toFixed(2)}`;
+  taxElem.textContent = `$${tax.toFixed(2)}`;
+  totalElem.textContent = `$${total.toFixed(2)}`;
+}
+
+// Event Listeners
+document.getElementById('search-bar').addEventListener('input', renderProducts);
+document.getElementById('category-filter').addEventListener('change', renderProducts);
+document.getElementById('sort-order').addEventListener('change', renderProducts);
+document.getElementById('price-slider').addEventListener('input', (e) => {
+  document.getElementById('price-value').textContent = e.target.value;
+  renderProducts();
+});
+
+document.getElementById('cart-btn').addEventListener('click', () => {
+  document.getElementById('cart-drawer').classList.remove('translate-x-full');
+});
+document.getElementById('close-cart').addEventListener('click', () => {
+  document.getElementById('cart-drawer').classList.add('translate-x-full');
+});
+
+// Initial render
+renderProducts();
+</script>
+
+</body>
+</html>
