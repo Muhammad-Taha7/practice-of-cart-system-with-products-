@@ -3,7 +3,7 @@ const products = [
   { name: "Laptop", price: 90, category: "electronics", img: "https://cdn.thewirecutter.com/wp-content/media/2024/11/cheapgaminglaptops-2048px-7981.jpg?auto=webp" },
   { name: "T-Shirt", price: 20, category: "clothing", img: "https://zed.com.pk/cdn/shop/files/050A7239.jpg?v=1694254964" },
   { name: "Jeans", price: 30, category: "clothing", img: "https://img.drz.lazcdn.com/static/pk/p/7c63b65d085369c8c5336a8110701997.jpg_720x720q80.jpg_.webp" },
-  { name: "Sofa", price: 80, category: "home", img: "https://i5.walmartimages.com/seo/Black-Velvet-Sofa-82-3-Seat-Sofa-Couch-Velvet-Upholstered-Couch-Living-Room-Modern-Futon-Tufted-Sofa-Gold-Metal-Legs-Accent-Arm-Sofa-Furniture-Home-A.jpeg" }
+  { name: "Sofa", price: 80, category: "home", img: "https://woodenhub.pk/cdn/shop/files/sixxx.png?v=1725032447" }
 ];
 
 let cart = [];
